@@ -56,21 +56,7 @@ ms=manifest.read_text().replace('<application android:theme=', '<application and
 manifest.write_text(ms)
 print('Widget labels, resize metadata, text readability and launcher icon patched')
 
-# Improve completion visibility and make the tasks widget title open the app.
-provider=p/'app/src/main/java/com/myorganizer/app/TasksWidgetProvider.kt'
-ps=provider.read_text()
-ps=ps.replace('views.setTextViewText(textIds[index], task.optString("title"))', '''views.setTextViewText(textIds[index], if (done) "✓  " + task.optString("title") else task.optString("title"))
-                    views.setTextColor(textIds[index], if (done) 0xFF6B7280.toInt() else 0xFFFFFFFF.toInt())''')
-ps=ps.replace('manager.updateAppWidget(widgetId, views)', '''val openApp = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val openPending = PendingIntent.getActivity(context, 7000 + widgetId, openApp,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_title, openPending)
-            views.setOnClickPendingIntent(R.id.widget_subtitle, openPending)
-            manager.updateAppWidget(widgetId, views)''')
-provider.write_text(ps)
-print('Task widget completion styling and title/subtitle app navigation patched')
+
 
 # Route widgets to their relevant screen on launch.
 main=p/'app/src/main/java/com/myorganizer/app/MainActivity.kt'
