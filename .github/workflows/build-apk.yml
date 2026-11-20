@@ -28,7 +28,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y unzip
           unzip -q MyOrganizer_Android_Project_0.4.9.zip -d project
-          PROJECT_DIR="$(find project -name settings.gradle.kts -printf '%h\\n' | head -n 1)"
+          PROJECT_DIR="$(find project -name settings.gradle.kts -printf '%h\n' | head -n 1)"
           if [ -z "$PROJECT_DIR" ]; then
             echo "Could not find settings.gradle.kts in the uploaded project archive"
             find project -maxdepth 4 -type f | sort
