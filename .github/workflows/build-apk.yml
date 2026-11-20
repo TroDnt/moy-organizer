@@ -5,6 +5,7 @@ on:
     paths:
       - 'MyOrganizer_Android_Project_0.4.9.zip'
       - '.github/workflows/build-apk.yml'
+      - 'tools/**'
   workflow_dispatch:
 
 permissions:
