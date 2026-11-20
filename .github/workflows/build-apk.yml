@@ -48,6 +48,12 @@ jobs:
           sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g; s/JVM_1_8/JVM_17/g' "$BUILD_FILE"
           cat >> "$BUILD_FILE" <<'EOF'
 
+          android {
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+          }
           tasks.withType<JavaCompile>().configureEach {
               sourceCompatibility = "17"
               targetCompatibility = "17"
