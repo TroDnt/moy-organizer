@@ -71,3 +71,20 @@ ps=ps.replace('manager.updateAppWidget(widgetId, views)', '''val openApp = Inten
             manager.updateAppWidget(widgetId, views)''')
 provider.write_text(ps)
 print('Task widget completion styling and title/subtitle app navigation patched')
+
+# Route widgets to their relevant screen on launch.
+main=p/'app/src/main/java/com/myorganizer/app/MainActivity.kt'
+ms=main.read_text()
+ms=ms.replace('setContent { OrganizerApp(this) }','setContent { OrganizerApp(this, intent.getStringExtra("open_section")) }')
+ms=ms.replace('fun OrganizerApp(context: Context) {\n    var section by remember { mutableStateOf("Главная") }','fun OrganizerApp(context: Context, initialSection: String? = null) {\n    var section by remember { mutableStateOf(initialSection?.takeIf { it in listOf("Главная", "Задачи", "Календарь", "Заметки", "Напоминания") } ?: "Главная") }')
+main.write_text(ms)
+for file,marker in [('TasksWidgetProvider.kt','manager.updateAppWidget(widgetId, views)'),('CalendarWidgetProvider.kt','manager.updateAppWidget(id, views)'),('ShiftWidgetProvider.kt','manager.updateAppWidget(id, views)')]:
+ fp=p/'app/src/main/java/com/myorganizer/app'/file
+ txt=fp.read_text()
+ if file=='TasksWidgetProvider.kt':
+  replacement='''val open = Intent(context, MainActivity::class.java).apply {\n                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP\n                putExtra("open_section", "Задачи")\n            }\n            val openPending = PendingIntent.getActivity(context, 7000 + widgetId, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)\n            views.setOnClickPendingIntent(R.id.widget_title, openPending)\n            views.setOnClickPendingIntent(R.id.widget_subtitle, openPending)\n            '''+marker
+  txt=txt.replace(marker,replacement)
+ else:
+  txt=txt.replace('flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP\n            }','flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP\n                putExtra("open_section", "Календарь")\n            }')
+ fp.write_text(txt)
+print('Widget navigation patch applied')
