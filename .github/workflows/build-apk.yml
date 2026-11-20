@@ -37,6 +37,9 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Android project found at: $PROJECT_DIR"
 
+      - name: Improve widgets and launcher icon
+        run: python3 tools/patch_widgets.py
+
       - name: Package extracted source for review
         run: |
           sudo apt-get install -y zip
