@@ -1,0 +1,45 @@
+name: Build Android APK
+
+on:
+  push:
+    paths:
+      - 'MyOrganizer_Android_Project_0.4.9.zip'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          unzip -q MyOrganizer_Android_Project_0.4.9.zip -d project
+          echo "PROJECT_DIR=project/MyOrganizer_release" >> "$GITHUB_ENV"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: moy-organizer-debug-apk
+          path: project/MyOrganizer_release/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
