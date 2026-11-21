@@ -51,8 +51,13 @@ colors=res/'values/colors.xml'
 cr=ET.Element('resources')
 ET.SubElement(cr,'color',name='launcher_bg').text='#FF7C3AED'
 colors.write_text(ET.tostring(cr,encoding='unicode'))
+# Legacy launcher icon fallback: many launchers/devices ignore adaptive icon-only entries.
+legacy=res/'mipmap'; legacy.mkdir(exist_ok=True)
+(legacy/'ic_launcher.xml').write_text('''<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108"><path android:fillColor="#FF7C3AED" android:pathData="M0,0h108v108h-108z"/><path android:fillColor="#FF1E293B" android:pathData="M18,15h72a6,6 0 0,1 6,6v66a6,6 0 0,1 -6,6h-72a6,6 0 0,1 -6,-6v-66a6,6 0 0,1 6,-6z"/><path android:fillColor="#FF38BDF8" android:pathData="M34,17h40v9h-40z"/><path android:fillColor="#FFFFFFFF" android:pathData="M34,46l8,8 14,-17 6,5 -20,24 -14,-14z"/><path android:fillColor="#FFFFD166" android:pathData="M34,68l8,8 14,-17 6,5 -20,24 -14,-14z"/></vector>''')
 manifest=p/'app/src/main/AndroidManifest.xml'
-ms=manifest.read_text().replace('<application android:theme=', '<application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme=')
+ms=manifest.read_text()
+import re
+ms=re.sub(r'<application(?=[^>]*>)', lambda m: m.group(0) if 'android:icon=' in m.group(0) else m.group(0).replace('<application','<application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher"',1), ms, count=1)
 manifest.write_text(ms)
 print('Widget labels, resize metadata, text readability and launcher icon patched')
 
