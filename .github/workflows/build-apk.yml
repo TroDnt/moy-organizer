@@ -41,6 +41,9 @@ jobs:
       - name: Improve widgets and launcher icon
         run: python3 tools/patch_widgets.py
 
+      - name: Add shift-based alarm
+        run: python3 tools/patch_alarm.py
+
       - name: Package extracted source for review
         run: |
           sudo apt-get install -y zip
