@@ -51,9 +51,11 @@ fun ShiftAlarmScreen(context:Context){
 """
 main.write_text(s)
 manifest=p/"app/src/main/AndroidManifest.xml"; m=manifest.read_text()
-rec='''        <receiver android:name=".ShiftAlarmReceiver" android:enabled="true" android:exported="false"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter></receiver>
-        <receiver android:name=".ShiftAlarmReceiver" android:enabled="true" android:exported="false"><intent-filter><action android:name="com.myorganizer.app.SHIFT_WAKE"/></intent-filter></receiver>
+combined='''        <receiver android:name=".ShiftAlarmReceiver" android:enabled="true" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/><action android:name="com.myorganizer.app.SHIFT_WAKE"/></intent-filter>
+        </receiver>
 '''
-if "ShiftAlarmReceiver" not in m:m=m.replace('        <receiver android:name=".ReminderReceiver"',rec+'        <receiver android:name=".ReminderReceiver"',1)
+if "ShiftAlarmReceiver" not in m:
+ m=m.replace("</application>",combined+"</application>",1)
 manifest.write_text(m)
 print("Shift alarm patched")
