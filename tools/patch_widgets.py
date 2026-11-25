@@ -79,3 +79,21 @@ for file,marker in [('TasksWidgetProvider.kt','manager.updateAppWidget(widgetId,
   txt=txt.replace('flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP\n            }','flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP\n                putExtra("open_section", "Календарь")\n            }')
  fp.write_text(txt)
 print('Widget navigation patch applied')
+
+
+# Explicit launcher resource and calendar readability.
+ms=manifest.read_text()
+ms=re.sub(r'android:(?:icon|roundIcon)="[^"]*"', '', ms)
+ms=ms.replace('<application','<application android:icon="@drawable/organizer_launcher" android:roundIcon="@drawable/organizer_launcher"',1)
+manifest.write_text(ms)
+(drawable/'organizer_launcher.xml').write_text((legacy/'ic_launcher.xml').read_text())
+s=main.read_text()
+s=s.replace('import androidx.compose.foundation.background','import androidx.compose.foundation.border\nimport androidx.compose.foundation.background',1)
+s=s.replace('DateTimeFormatter.ofPattern("d MMMM")','DateTimeFormatter.ofPattern("d MMMM", java.util.Locale.forLanguageTag("ru"))')
+s=s.replace('DateTimeFormatter.ofPattern("EEEE")','DateTimeFormatter.ofPattern("EEEE", java.util.Locale.forLanguageTag("ru"))')
+s=s.replace('Text("Календарь", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)','Text("Календарь", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)\n    Row(verticalAlignment = Alignment.CenterVertically) { Text("Сегодня: " + LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM, EEEE", java.util.Locale.forLanguageTag("ru"))), color = Color(0xFF67E8F9), modifier = Modifier.weight(1f)); TextButton(onClick = { selectedDate = LocalDate.now(); changeMonth(YearMonth.now()) }) { Text("Сегодня") } }')
+s=s.replace('DateTimeFormatter.ofPattern("LLLL yyyy")','DateTimeFormatter.ofPattern("LLLL yyyy", java.util.Locale.forLanguageTag("ru"))')
+s=s.replace('.background(if (date == selectedDate) accent else color, RoundedCornerShape(8.dp)).clickable', '.background(color, RoundedCornerShape(8.dp)).border(if (date == LocalDate.now() || date == selectedDate) 2.dp else 0.dp, if (date == LocalDate.now()) Color(0xFF67E8F9) else if (date == selectedDate) Color.White else Color.Transparent, RoundedCornerShape(8.dp)).clickable')
+s=s.replace('if (day > 0) Text(day.toString(), color = Color.White, fontWeight = if (date == LocalDate.now()) FontWeight.Bold else FontWeight.Normal)','if (day > 0) Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(day.toString(), color = if (date == LocalDate.now()) Color(0xFF67E8F9) else Color.White, fontWeight = if (date == LocalDate.now()) FontWeight.Bold else FontWeight.Normal); if (date == LocalDate.now()) Text("СЕГ", color = Color(0xFF67E8F9), style = MaterialTheme.typography.labelSmall) }')
+s=s.replace('    Text(selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))','    Text("Бирюзовая рамка — сегодня · белая — выбранный день", color = muted, style = MaterialTheme.typography.bodySmall)\n    Text("Жёлтый — день · фиолетовый — ночь · зелёный — выходной", color = muted, style = MaterialTheme.typography.bodySmall)\n    Text(selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale.forLanguageTag("ru")))')
+main.write_text(s)
